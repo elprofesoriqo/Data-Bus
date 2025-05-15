@@ -1,0 +1,289 @@
+Celem ćwiczenia jest zapoznanie studentów z zagadnieniami sterowania transmisją informacji
+poprzez szynę danych, pomiędzy kilkoma nadajnikami i odbiornikami. Z tymi zagadnieniami
+można spotkać się często przy konstrukcji cyfrowych układów sterowania i układów
+współpracujących z mikroprocesorami.
+Opisany zestaw laboratoryjny jest symulatorem czterobitowej szyny danych. Układ został
+fizycznie zrealizowany w oparciu o dwa mikroprocesory i umożliwia realizację przesłań danych
+pomiędzy różnymi układami przyłączonymi do szyny danych oraz wyświetlanie informacji o stanie
+poszczególnych bloków.
+9.2. OPIS ZESTAWU LABORATORYJNEGO
+ Na wstępnie wyjaśnijmy znaczenie terminu „szyna danych”. Szyna danych (ang. data bus)
+to zespół linii (przewodów) służących do przesyłania danych między elementami połączonymi za
+jej pośrednictwem. Fizycznie szyna danych to przewody, do których przyłączone zostały wejścia
+i wyjścia układów współpracujących z szyną. Nadajnik ma wyjścia podłączone do szyny danych,
+natomiast odbiornik – wejścia. Układy będące nadajnikami informacji, albo mają wyjścia
+trójstanowe, albo są podłączone do szyny poprzez bramki z wyjściami trójstanowymi.
+Sytuacja jest prosta, gdy do szyny podłączony jest tylko jeden nadajnik – wtedy trzeba tylko
+wygenerować sygnał zapisujący dane pojawiające na szynie do wybranego odbiornika.
+W przypadku, gdy do szyny danych podłączonych jest kilka źródeł informacji konieczny jest wtedy
+układ sterujący wyjściami trójstanowymi nadajników oraz sygnałami strobującymi odbiorników.
+Zagadnienie to zostanie omówione w p.9.2.3.
+ Czasami jednak, mówiąc „szyna danych” mamy na myśli cały zespół nadajników
+i odbiorników połączonych galwanicznie przewodami, które są fizycznie szyną - w tym przypadku
+czterobitową.
+ W tym zestawie przesłania po szynie danych i przyłączanie do niej różnych układów są
+symulowane programowo przy wykorzystaniu dwóch mikrokontrolerów z rodziny AVR (układów
+Atmega8 i Atmega32).
+ Działanie tego zestawu laboratoryjnego zostało opisane tak, jakby to było urządzenie
+zbudowane z podzespołów przedstawionych na jego głównej płycie czołowej i operacje przesłań
+byłyby dokonywane w konkretnym sprzęcie, przy wykonywaniu wyspecyfikowanych instrukcji
+i fizycznych dekoderów sterujących przesyłaniem informacji przez szynę danych.
+ Z punktu widzenia użytkownika nieistotna jest budowa całego fizycznego układu w oparciu
+o mikrokontrolery i to, że po odpowiednim zaprogramowaniu symulują one pracę sprzętowej szyny
+danych. Istotne jest to, że układ symulatora zachowuje się tak samo jak równoważny mu układ
+zbudowany z układów TTL średniej i małej skali integracji.
+ Poprawność działania szyny danych należy kontrolować obserwując zawartości rejestrów
+wyświetlane na LED-ach oraz stany diod sygnalizacyjnych.
+Widoki płyt: czołowej i pulpitu zestawu laboratoryjnego przedstawiono na Rys.9.1., który
+zamieszczono w Części 2 instrukcji „TECHNIKA CYFROWA. LABORATORIUM. CCYYKKLL
+ĆĆWWIICCZZEEŃŃGGRRUUPPOOWWYYCCHH.
+..”.
+9-2 STEROWANIE SZYNĄ DANYCH
+9.2.1. OZNACZENIA ELEMENTÓW NA PULPICIE ZESTAWU
+Przełączniki
+ZER. – przycisk zerowania generatora sterującego GS.
+START – przycisk inicjujący rozpoczęcie wykonywania cyklu, mikrocyklu lub programu,
+w zależności od ustawienia przełączników wyboru trybu (rodzaju) pracy zestawu.
+CZYTAJ – przycisk inicjujący odczyt danych z klawiatury dane i ponowny start działania
+układu sterującego, który zatrzymał się po napotkaniu instrukcji czytania danych.
+Mikrocykl
+Cykl - zespół przełączników zależnych - wybór trybu pracy zestawu laboratoryjnego.
+Program
+Sieć – przełącznik do włączania/wyłączania zasilania zestawu laboratoryjnego.
+Diody LED
+Praca – LED sygnalizujący wykonywanie przez zestaw cyklu, mikrocyklu lub programu.
+Gotów – LED sygnalizujący oczekiwanie na wpis danych wejściowych - dioda zgaśnie po
+odczycie stanu przycisków z klawiatury dane, po naciśnięciu przycisku CZYTAJ.
+Koniec – LED sygnalizujący zakończenie wykonywania przez zestaw cyklu, mikrocyklu lub
+programu.
+SIEĆ – LED sygnalizujący włączenie zasilania zestawu laboratoryjnego.
+9.2.2. OPIS ELEMENTÓW NA GŁÓWNEJ PŁYCIE CZOŁOWEJ ZESTAWU
+ Na płycie głównej zestawu laboratoryjnego STEROWANIE SZYNĄ DANYCH przedstawiono
+jego schemat blokowy. Uwidoczniono na nim połączenia między układami współpracującymi
+z szyną oraz elementy układu sterującego pracą szyny danych. Ponadto na płycie głównej zestawu
+laboratoryjnego znajdują się przyciski i przełączniki służące do programowania i sterowania pracą
+zestawu, oraz diody LED, których przeznaczenie opisano poniżej.
+Przełączniki
+a) w dolnej części płyty głównej:
+zer. – przycisk zerowania adresu przy zapisie oraz odczycie RAM-u.
+zapis/praca – przełącznik wyboru trybu pracy RAM: wciśnięty = zapis RAM-u, wyciśnięty = praca
+zestawu.
+wpisz – przycisk do zapisania, do RAM-u słowa ustawionego na klawiaturze CT, BT, AT,
+CC, BC, AC, W1 ,W2, po jego wciśnięciu adres automatycznie zwiększa się o 1.
+CT, BT, AT, CC, BC, AC, W1, W2 – klawiatura do ustawiania słowa przy zapisie RAM-u:
+przycisk wciśnięty = „1”, wyciśnięty = „0”.
+RA, RB, RC – zespół przełączników zależnych do wyboru rejestru, którego zawartość ma być
+wyświetlana na diodach, umieszczonych na płycie czołowej zestawu
+laboratoryjnego, poniżej tych rejestrów.
+Ćwiczenie 9 9-3
+b) w górnej części płyty głównej:
+dane (d3, d2, d1, d0) – klawiatura do wprowadzania danych wejściowych: przycisk wciśnięty = „1”,
+wyciśnięty = „0”.
+instrukcja (I2, I1, I0) – klawiatura do wprowadzania kodu instrukcji: przycisk wciśnięty = „1”,
+wyciśnięty = „0”.
+zer. – przycisk przy rejestrze RP, do zerowania adresu przy zapisie, oraz odczycie
+rejestru programu.
+praca/zapis – przełącznik przy rejestrze RP, do wyboru trybu pracy rejestru programu:
+wciśnięty = zapis RP, wyciśnięty = praca zestawu;
+wpisz – przycisk przy rejestrze RP, do zapisania słowa ustawionego na klawiaturze I2, I1, I0
+do RP, po jego wciśnięciu adres automatycznie zwiększa się o 1.
+Diody LED
+I2, I1, I0, C1, C0 – wyświetlanie aktualnego adresu pamięci, przy zapisie jak i odczycie RAM-u.
+CT, BT, AT, CC, BC, AC, W1 ,W2 – wyświetlanie wartości słowa sterującego wpisanego do pamięci
+RAM, znajdującego się pod adresem wyświetlanym przez diody I2, I1, I0, C1, C0,
+przy odczycie RAM-u.
+adres (a2, a1, a0) – wyświetlanie adresu aktualnie wykonywanej instrukcji z rejestru RP.
+diody rejestrów RA, RB, RC (Q3, Q2, Q1, Q0) – wyświetlane zawartości poszczególnych rejestrów.
+Wybór rejestru dokonuje się poprzez wciśnięcie odpowiedniego przycisku: RA, RB
+lub RC, które znajdują się z prawej strony rejestrów.
+diody rejestru RWY (Q3, Q2, Q1, Q0) – wyświetlanie zawartości rejestru RWY.
+9.2.3. BLOKI FUNKCJONALNE I ELEMENTY ZESTAWU
+1) Układ sterujący
+Układ sterujący pracą zestawu laboratoryjnego STEROWANIE SZYNĄ DANYCH zbudowany
+jest z następujących zespołów:
+- pamięci RAM o organizacji 32 x 8 (32 słowa 8-bitowe),
+- generatora sygnałów zegarowych GS,
+- dwóch dekoderów adresowych (BIN  1 z n).
+◄ Pamięć RAM
+ Jest to najważniejsza część tego zestawu laboratoryjnego. W niej są zapisywany kody
+poszczególnych mikroinstrukcji, które mają być realizowane w zestawie po wczytaniu instrukcji
+zadanej do wykonania.
+ Wejścia adresowe pamięci RAM połączone są z wyjściami rejestru instrukcji RI (bity I2, I1,
+I0) i z wyjściami generatora GS (bity C1, C0); przy czym C0 jest najmłodszym bitem adresu, a I2
+– najstarszym.
+9-4 STEROWANIE SZYNĄ DANYCH
+Wyjścia pamięci RAM oznaczone symbolami: CT, BT, AT, są połączone z wejściami
+adresowymi dekodera 1; wyjścia: CC, BC, AC - z wejściami adresowymi dekodera 2; natomiast
+wyjścia W1 i W2 – z wejściami informacyjnymi rejestrów pomocniczych R1 i R2.
+Do wejść danych RAM-u przyłączone są sygnały z przełączników: CT, BT, AT, CC, BC, AC,
+W1, W2, na których ustawiane są wartości słów zapisywanych w pamięci.
+Do wejść sterujących pracą pamięci przyłączone są sygnały sterujące zapisem i odczytem
+RAM-u – z przełączników i przycisków: zer., praca/zapis, wpisz (znajdują się one w dolnej
+części płyty głównej).
+Organizację pamięci RAM, z uwidocznieniem jej podziału na obszary przyporządkowane
+poszczególnym instrukcjom przedstawiono w tabeli 9.1. 
+W każdym słowie pamięci RAM zapisujemy informacje opisujące działania w danym mikrocyklu
+w następującej kolejności:
+- na pozycjach CT, BT, AT - zakodowaną informację o numerze nadajnika wykorzystywanego
+w tym mikrocyklu (patrz Tabela.9.2.).
+- na pozycjach CC, BC, AC - zakodowaną informację o numerze odbiornika
+wykorzystywanego w tym mikrocyklu (patrz Tabela.9.3.).
+- na pozycjach W1 i W2 - zakodowaną informację o funkcji realizowanej przez ALU przy
+wykonywaniu danej instrukcji (patrz Tabela.9.4. i Tabela.9.5.).
+◄ Generator GS
+ Generator sygnałów zegarowych GS steruje wykonywaniem poszczególnych instrukcji.
+Ponadto – w czasie zapisu pamięci RAM - wyznacza kolejne adresy, pod którymi mają być
+zapisywane kody mikroinstrukcji.
+Stany jego wyjść C1, C0 przyjmują kolejno wartości: 00, 01, 10, 11. W trybie praca, każde
+przejście między kolejnymi stanami C1, C0 oznacza, że został wykonany jeden mikrocykl. Do
+realizacji każdej instrukcji muszą zostać wykonane mikroinstrukcje w czterech mikrocyklach.
+W trybie zapis stan wyjść generatora wyznacza adresy, pod którymi zapisujemy kolejne słowa
+do pamięci RAM.
+◄ Dekodery sygnałów sterujących
+ Dekoder 1, na którego wejścia podawane są z RAM-u sygnały CT, BT, AT, wytwarza
+sygnały sterujące Ti
+. Jego sygnały wyjściowe: TI
+, TA, TB, TC, TALU, TWE, podawane są na
+wejścia sterujące przyłączaniem poszczególnych nadajników do szyny danych. Wyznaczają one
+moment otwarcia trójstanowych wyjść umożliwiając wystawienie na szynę danych informacji
+z wybranego nadajnika. Sposób generowania sygnałów sterujących Ti
+ na wyjściach dekodera 1
+przedstawiono w tabeli 9.2. 
+Dekoder 2, na którego wejścia podawane są z RAM-u sygnały CC, BC, AC, wytwarza
+sygnały sterujące Cj
+. Jego sygnały wyjściowe: CRI, CA, CB, CC, CR1, CR2, CWY, podawane są na
+wejścia zapisu (zegarowe) poszczególnych odbiorników. Wyznaczają one moment zapisu
+informacji z szyny danych do poszczególnych odbiorników. W zestawie laboratoryjnym wszystkie
+odbiorniki przyłączone do szyny danych to rejestry z równoległym wpisem danych.
+Jednostka arytmetyczno-logiczna (ALU)
+Układ ALU realizuje operacje arytmetyczne i logiczne na 4-bitowych liczbach zapisanych
+w rejestrach R1 i R2. Rodzaj wykonywanej operacji określa pięciobitowe słowo stanu:
+M S3 S2 S1 S0, które jest zapisywane w dwóch 3-bitowych rejestrach przesuwających.
+Na Rys.9.1. przedstawiono układ połączeń ALU z wyjściami w/w rejestrów. Na wejścia
+informacyjne rejestrów przesuwających podawane są z pamięci RAM sygnały W1 i W2, zaś na ich
+wejścia zegarowe podawany jest sygnał = CRI + CR1 + CR2. Z tych zależności wynika, że w czasie
+projektowania instrukcji z użyciem jednostki arytmetyczno-logicznej należy koniecznie
+przewidzieć wygenerowanie w trzech pierwszych mikrocyklach sygnałów CRI, CR1 i CR2.
+W celu ustalenia prawidłowych stanów wejść sterujących, określających wybór operacji, jaką
+ma wykonać ALU należy także we właściwej kolejności zapisać ich wartości w pamięci RAM, na
+pozycjach W1 i W2 w kolejnych mikrocyklach. Sposób kodowania funkcji realizowanej przez ALU
+przedstawiono w tabeli 9.4. 
+9.3. OBSŁUGA ZESTAWU LABORATORYJNEGO
+ Zestaw laboratoryjny musi zostać przygotowany do pracy. Należy w tym celu zdefiniować
+listę instrukcji, które mają być wykonywane przez zestaw laboratoryjny STEROWANIE SZYNĄ
+DANYCH, a następnie trzeba zapisać w pamięci RAM odpowiednie kody, zapewniające realizacje
+zaprojektowanych operacji.
+ Listę rozkazów najlepiej jest umieścić w tabeli, o kształcie jak Tabela.9.1. Następnie
+możemy przystąpić do sekwencyjnego zapisu danych do pamięci RAM, a w dalszej części do
+wykonania zapisanego programu.
+9.3.1. ZAPIS PROGRAMU DO PAMIĘCI RAM
+W tym celu należy wykonać następujące czynności:
+a) Przełącznik zapis/praca ustawić w pozycji zapis - wciśnięty.
+b) Wyzerować adres w pamięci RAM (I2, I1, I0) oraz stan wyjść adresowych generatora
+GS (C1, C0) poprzez naciśnięcie odpowiadającym im odpowiednich przycisków zer.
+c) Na klawiaturze ustawić wartość słowa sterującego CT, BT, AT, CC, BC, AC, W1, W2,
+a następnie dokonać wpisu tego słowa do pamięci, pod adresem wyświetlanym przez
+diody I2, I1, I0, C1, C0, poprzez naciśnięcie przycisku wpisz. Stan wyjść adresowych
+I2, I1, I0, C1, C0 zostanie automatycznie zwiększony o jeden.
+d) Powtórzyć czynności z pkt. c) aż do zapisania wszystkich instrukcji.
+Zapis programu do rejestru programu RP odbywa się analogicznie jak zapis do pamięci RAM.
+9.3.2. WYKONANIE INSTRUKCJI ZAPISANYCH W PAMIĘCI
+W tym celu należy wykonać następujące czynności:
+a) Przełącznik zapis/praca ustawić w pozycji praca - wyciśnięty.
+b) W zależności od interesującego nas trybu pracy programu wybrać Mikrocykl, Cykl
+lub Program.
+c) Wyzerować adres w pamięci RAM ((I2, I1, I0) oraz stan wyjść adresowych generatora
+GS (C1, C0) poprzez naciśnięcie odpowiadających im przycisków zer.
+d) Wcisnąć przycisk START. Układ rozpocznie wykonywanie zapisanego programu.
+e) W razie potrzeby (świecąca dioda Gotów) dokonywać wpisu danych wejściowych
+z klawiatury Dane przez naciśnięcie przycisku CZYTAJ.
+f) Po zakończeniu wykonywania Mikrocyklu bądź Cyklu wznowienie wykonywania
+programu następuje przez ponowne naciśnięcie przycisku START. Należy pamiętać
+o ustawieniu odpowiedniej zawartości rejestru instrukcji RI
+.
+Ćwiczenie 9 9-15
+9.3.3. KOREKTA PROGRAMU ZAPISANEGO W PAMIĘCI RAM
+W przypadku wystąpienia błędu w zapisanym programie istnieje możliwość zapisu
+poprawnego słowa z klawiatury CT, BT, AT, CC, BC, AC, W1, W2 i korekta nieprawidłowej części
+programu. Aby tego dokonać należy postępować jak w przypadku schematu zapisu nowego
+programu przedstawionego w pkt.9.3.1., z tą różnicą, że zamiast dokonywać zerowania adresu
+w pamięci RAM, na klawiaturze I2, I1, I0 ustawiamy adres pamięci pod którym chcemy zapisać
+poprawną wartość słowa sterującego.
+9.4. PROGRAM ĆWICZENIA
+9.4.1. PRZYGOTOWANIE DO ZAJĘĆ
+1. W domu należy rozwiązać zadania otrzymane od prowadzącego. W przypadku, gdy zadany
+problem wymaga wykonania ciągu kilku złożonych obliczeń z wykorzystaniem ALU,
+wskazane jest przygotowanie algorytmu wykonywanych obliczeń w postaci schematu
+operacyjnego (jak przy programowaniu).
+2. Następnie należy przygotować listę rozkazów potrzebnych do realizacji programu. Najlepiej
+jest przygotować ją w postaci podanej w Tab.9.1.
+9.4.1. PRZEBIEG ĆWICZENIA W LABORATORIUM
+1. W laboratorium, po zaakceptowaniu przez prowadzącego przygotowanego w domu
+rozwiązania problemu należy zapisać zaprojektowane instrukcje w pamięci RAM, oraz
+program w pamięci RP. Postępowanie w trakcie tych czynności opisano w p. 9.3.
+2. Po zapisaniu instrukcji w RAM i programu w RP należy sprawdzić poprawność działania
+programu na przygotowanych przez siebie danych, a następnie zademonstrować go
+prowadzącemu. Prowadzący może wymagać przeprowadzenia demonstracji przy
+wykorzystaniu danych podanych przez niego.
+3. Po zaakceptowaniu przez prowadzącego przedstawionego rozwiązania, należy wykonać
+jego ewentualne dodatkowe polecenia. Po ich wykonaniu należy uzyskać potwierdzenie
+wykonania ćwiczenia.
+9-16 STEROWANIE SZYNĄ DANYCH
+9.5. PRZYKŁADOWE ZADANIA PROJEKTOWE
+1. Przygotować taki zestaw instrukcji (maksymalnie 8), który będzie wczytywał dwie liczby
+4 - bitowe A(a3a2a1a0) i B(b3b2b1b0) podawane przez prowadzącego zajęcia, a następnie
+wykona na nich następującą operacje (jedną z podanych wybiera prowadzący):
+a.
+b.
+c.
+Liczbę wyjściową C(c3c2c1c0) zapisać do rejestru wyjściowego RWY. Należy przygotować
+zestaw danych, na których będzie można sprawdzić poprawność działania programu.
+Sprawdzić działanie w dwóch trybach pracy: CYKL i PROGRAM.
+2. Przygotować taki zestaw instrukcji (maksymalnie 8), który będzie wczytywał dwie liczby
+4 - bitowe A(a3a2a1a0) i B(b3b2b1b0) podawane przez prowadzącego zajęcia, a następnie
+będzie wpisywało do rejestru wyjściowego RWY liczby tworzące ciąg Fibonacciego (kolejna
+liczba jest sumą dwóch poprzednich): najpierw C=A+B, potem D=B+C, następnie E=C+D,
+etc. Określić, ile można wygenerować takich liczb za pomocą 8 instrukcji (wliczając w nie
+wczytanie liczb z klawiatury). W przypadku przepełnienia – przeniesienie należy zaniedbać.
+Sprawdzić działanie w dwóch trybach pracy: CYKL i PROGRAM.
+3. Przygotować taki zestaw instrukcji (maksymalnie 8), który będzie wczytywał liczbę
+4 - bitową A(a3a2a1a0) podawaną przez prowadzącego zajęcia, a następnie będzie wpisywał
+do rejestru wyjściowego RWY liczby będące o 1 mniejszą niż poprzednia: A, A-1, A-2, A-3,
+A-4, etc. Program ma działać w nieskończonej pętli. Sprawdzić działanie w dwóch trybach
+pracy: CYKL i PROGRAM.
+4. Przygotować taki zestaw instrukcji (maksymalnie 8), który będzie wczytywał liczbę
+4 - bitową A(a3a2a1a0) podawaną przez prowadzącego zajęcia, a następnie będzie wpisywał
+do rejestru wyjściowego RWY liczby będące o 2 większe niż poprzednia: A, A+2, A+4, A+6,
+A+8, etc. Program ma działać w nieskończonej pętli. Sprawdzić działanie w dwóch trybach
+pracy: CYKL i PROGRAM.
+5. Przygotować taki zestaw instrukcji (maksymalnie 8), który będzie wczytywał dwie liczby
+4 - bitowe A(a3a2a1a0) i B(b3b2b1b0) podawane przez prowadzącego zajęcia. Następnie
+należy sprawdzić, czy liczba B jest równa kwadratowi liczby A. Jeżeli B=A2
+, należy B
+przesłać do rejestru RA, w przeciwnym przypadku – do rejestru RA trzeba wpisać 0.
+Sprawdzić działanie w dwóch trybach pracy: CYKL i PROGRAM.
+6. Przygotować taki zestaw instrukcji (maksymalnie 8), który będzie wczytywał liczbę
+4 - bitową A(a3a2a1a0) podawaną przez prowadzącego zajęcia, a następnie, jeżeli a3=0,
+będzie wpisywał do rejestru wyjściowego RWY liczbę zanegowaną względem A; natomiast
+jeżeli a3=1, to będzie wpisywał liczbę 2 razy mniejszą niż A. Sprawdzić działanie w dwóch
+trybach pracy: CYKL i PROGRAM.
+7. Przygotować taki zestaw instrukcji (maksymalnie 8), który będzie wczytywał liczbę
+4 - bitową A(a3a2a1a0) podawaną przez prowadzącego zajęcia, a następnie, jeżeli A≥8 to
+będzie dzielił tę liczbę na dwa i wpisywał do rejestru wyjściowego RWY, jeżeli A<8 – będzie
+wpisywał A do rejestru wyjściowego RWY. Następnie, prowadzący zajęcia musi podać
+Ćwiczenie 9 9-17
+liczbę, która zostanie dodana do ostatniego wyniku i ta liczba ma zostać wpisana do rejestru
+wyjściowego RWY. Sprawdzić działanie w dwóch trybach pracy: CYKL i PROGRAM.
+8. Zdefiniować taki zestaw instrukcji, aby możliwe było wykonanie następujących operacji:
+1) dane  RA,
+2) dane  RB,
+3) RA  R1,
+4) RB  R2,
+5) R1 + R2 (arytm) RC,
+6) RC  RWY,
+7) Wyzeruj RC
+- Przed przystąpieniem do testowania instrukcji należy przygotować zestawy danych, które
+będą podawane jako argumenty przy wykonywaniu poszczególnych instrukcji i wykonać
+obliczenia kontrolne dla instrukcji 5).
+- Sprawdzić działanie zaprojektowanych instrukcji w trzech trybach pracy zestawu
+laboratoryjnego: CYKL, MIKROCYKL i PROGRAM. 
